@@ -6,7 +6,7 @@ addEventListener('load', function() {
 
     document.getElementById('options').addEventListener('click', 
     function(){
-        console.error("Opció no implementada");
+        window.location.assign("./html/options.html");
     });
 
     document.getElementById('saves').addEventListener('click', 
