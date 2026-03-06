@@ -8,8 +8,17 @@ var options = function(){
 
     var pairs = $('#pairs');
     var difficulty = $('#dif');
-
+    
+    var savedOptions = localStorage.options && JSON.parse(localStorage.options);
     var options = Object.create(default_options);
+
+    if (savedOptions && savedOptions.pairs)
+        options.pairs = savedOptions.pairs;
+    if (savedOptions && savedOptions.difficulty)
+        options.difficulty = savedOptions.difficulty;
+
+    pairs.val(options.pairs);
+    difficulty.val(options.difficulty);
 
     pairs.on('change', function (){
         options.pairs = pairs.val();
@@ -21,7 +30,7 @@ var options = function(){
 
     return {
         applyChanges: function(){
-            // TODO: Save
+            localStorage.options = JSON.stringify(options);
         },
         defaultValues: function(){
             options.pairs = default_options.pairs;
