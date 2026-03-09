@@ -2,6 +2,7 @@ addEventListener('load', function() {
     document.getElementById('play').addEventListener('click', function(){
         let aliasJugador = prompt("Introdueix el teu àlies:");
         console.log("Àlies introduït: " + aliasJugador);
+        window.location.assign("./html/game.html");
     });
 
     document.getElementById('options').addEventListener('click', 
