@@ -34,3 +34,25 @@ button:active {
     background-color: white; 
     border: 3px solid white;
 }
+
+#game {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;          
+    max-width: 900px;   
+    margin: 20px auto;  
+}
+
+#game img {
+    width: 120px;       
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#game img:hover {
+    transform: scale(1.05); 
+}
