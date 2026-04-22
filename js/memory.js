@@ -14,9 +14,10 @@ var game = {
     states: [],
     setValue: null,
     ready: 0,
-    lastCard: null,
+    lastCards: [],
     score: 200,
-    pairs: 2,
+    groups: 2,
+    groupSize: 2,
     goBack: function(idx){
         this.setValue && this.setValue[idx](back);
         this.states[idx] = StateCard.ENABLE;
@@ -30,15 +31,20 @@ var game = {
             let toLoad = JSON.parse(sessionStorage.load);
             this.items = toLoad.items;
             this.states = toLoad.states;
-            this.lastCard = toLoad.lastCard;
+            this.lastCards = toLoad.lastCards;
             this.score = toLoad.score;
-            this.pairs = toLoad.pairs;
+            this.groups = toLoad.groups;
+            this.groupSize = toLoad.groupSize;
         }
         else{ // Nova partida
             this.items = resources.slice();          
             shuffe(this.items);                      
-            this.items = this.items.slice(0, this.pairs); 
-            this.items = this.items.concat(this.items);        
+            this.items = this.items.slice(0, this.groups); 
+            let baseItems = this.items.slice();
+            this.items = [];
+            for(let i = 0; i < this.groupSize; i++){
+                this.items = this.items.concat(baseItems);
+            }        
             shuffe(this.items);
             this.states = new Array(this.items.length);
         }
@@ -60,35 +66,41 @@ var game = {
     click: function(indx){
         if (this.states[indx] !== StateCard.ENABLE || this.ready < this.items.length) return;
         this.goFront(indx);
-        if (this.lastCard === null) this.lastCard = indx; // Primera carta clicada
-        else{ // Teníem carta prèvia
-            if (this.items[this.lastCard] === this.items[indx]){
-                this.pairs--;
-                this.states[this.lastCard] = this.states[indx] = StateCard.DONE;
-                if (this.pairs <= 0){
+        this.lastCards.push(indx); // Primera carta clicada
+        if(this.lastCards.length === this.groupSize){
+            let allMatch = this.lastCards.every(cardIdx =>
+                this.items[cardIdx] === this.items[this.lastCards[0]]
+            );
+            if(allMatch){
+                this.groups--;
+                this.lastCards.forEach(cardIdx => this.states[cardIdx] = StateCard.DONE);
+                if(this.groups <= 0){
                     alert(`Has guanyat amb ${this.score} punts!!!!`);
                     window.location.assign("../");
                 }
             }
-            else {
-                this.goBack(indx);
-                this.goBack(this.lastCard);
+            else{ // Teníem carta prèvia
+                let cardsToFlip = [...this.lastCards];
+                setTimeout(() => {
+                    cardsToFlip.forEach(cardIdx => this.goBack(cardIdx));
+                    }, 500); 
                 this.score -= 25;
                 if (this.score <= 0){
                     alert ("Has perdut");
                     window.location.assign("../");
                 }
             }
-            this.lastCard = null;
+            this.lastCards = [];
         }
     },
     save: function(){
         let to_save = JSON.stringify({
             items: this.items,
             states: this.states,
-            lastCard: this.lastCard,
+            lastCards: this.lastCards,
             score: this.score,
-            pairs: this.pairs
+            groups: this.groups,
+            groupSize: this.groupSize
         });
         let ret = false;
         fetch('../php/save.php', {
@@ -105,7 +117,7 @@ var game = {
         }
         window.location.assign("../");
     }
-}
+};
 
 function shuffe(arr){
     arr.sort(function () {return Math.random() - 0.5});
