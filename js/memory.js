@@ -1,13 +1,17 @@
-const resources = ['../resources/cb.png', '../resources/co.png',
-                '../resources/sb.png', '../resources/so.png',
-                '../resources/tb.png', '../resources/to.png'];
-const back = '../resources/back.png';
+const resources = [0, 1, 2, 3, 4, 5];
+const back = -1;
 
 const StateCard = Object.freeze({
   DISABLE: 0,
   ENABLE: 1,
   DONE: 2
 });
+
+let redrawCallback = null;
+
+export function setRedrawCallback(fn) {
+    redrawCallback = fn;
+}
 
 var game = {
     items: [],
@@ -18,6 +22,9 @@ var game = {
     score: 200,
     groups: 2,
     groupSize: 2,
+    mode: 1,   
+    level: 1,
+    maxGroups: 6,
     goBack: function(idx){
         this.setValue && this.setValue[idx](back);
         this.states[idx] = StateCard.ENABLE;
@@ -35,8 +42,22 @@ var game = {
             this.score = toLoad.score;
             this.groups = toLoad.groups;
             this.groupSize = toLoad.groupSize;
+            this.mode = toLoad.mode || 1; 
+            this.level = toLoad.level || 1;
         }
         else{ // Nova partida
+            this.setValue = [];
+            this.mode = parseInt(sessionStorage.getItem('gameMode')) || 1;
+            this.level = 1;
+            let config = localStorage.options ? JSON.parse(localStorage.options) : null;
+            if (this.mode === 1 && config) {
+                this.groupSize = parseInt(config.groupSize) || 2;
+                this.groups = parseInt(config.pairs) || 2;
+            }
+            else {
+                this.groupSize = 2;
+                this.groups = 2;
+            }
             this.items = resources.slice();          
             shuffe(this.items);                      
             this.items = this.items.slice(0, this.groups); 
@@ -49,6 +70,7 @@ var game = {
             this.states = new Array(this.items.length);
         }
     },
+
     start: function(){
         this.items.forEach((_,indx)=>{
             if (this.states[indx] === StateCard.DISABLE ||
@@ -75,8 +97,20 @@ var game = {
                 this.groups--;
                 this.lastCards.forEach(cardIdx => this.states[cardIdx] = StateCard.DONE);
                 if(this.groups <= 0){
-                    alert(`Has guanyat amb ${this.score} punts!!!!`);
-                    window.location.assign("../");
+                    if(this.mode === 1){
+                        alert(`Has guanyat el Mode 1 amb ${this.score} punts!`);
+                        window.location.assign("../");
+                    }
+                    else{
+                        alert(`Nivell ${this.level} superat! Preparat pel següent?`);
+                        this.level++;
+                        this.updateDifficulty(); 
+                        this.ready = 0;       
+                        this.lastCards = [];
+                        this.select();
+                        if (redrawCallback) redrawCallback();
+                        this.start();
+                    }
                 }
             }
             else{ // Teníem carta prèvia
@@ -116,7 +150,16 @@ var game = {
             localStorage.save = to_save;
         }
         window.location.assign("../");
-    }
+    },
+
+    updateDifficulty: function() {
+        if (this.level % 2 === 0 && this.groupSize < 4) {
+            this.groupSize++;
+        } else {
+            if (this.groups < this.maxGroups) this.groups++; 
+        }
+        this.score = 200 + (this.level * 50); 
+    },
 };
 
 function shuffe(arr){
