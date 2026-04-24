@@ -113,7 +113,7 @@ var game = {
                 this.lastCards.forEach(cardIdx => this.states[cardIdx] = StateCard.DONE);
                 if(this.pendingGroups <= 0){
                     if(this.mode === 1){
-                        updateRanking();
+                        updateRanking(this.score);
                         alert(`Has guanyat el Mode 1 amb ${this.score} punts!`);
                         window.location.assign("../");
                     }
@@ -136,7 +136,7 @@ var game = {
                     }, 500); 
                 this.score -= 25;
                 if (this.score <= 0){
-                    updateRanking();
+                    updateRanking(this.score);
                     alert ("Has perdut");
                     window.location.assign("../");
                 }
@@ -144,67 +144,76 @@ var game = {
             this.lastCards = [];
         }
     },
-save: function(){
-        let to_save = JSON.stringify({
-            items: this.items,
-            states: this.states,
-            lastCards: this.lastCards,
+save: function() {
+    let to_save = JSON.stringify({
+        items: this.items,
+        states: this.states,
+        lastCards: this.lastCards,
+        score: this.score,
+        groups: this.groups,           
+        pendingGroups: this.pendingGroups, 
+        groupSize: this.groupSize,
+        level: this.level,             
+        mode: this.mode
+    });
+    if (typeof updateRanking === 'function') {
+        updateRanking(this.score);
+    }
+    fetch('../php/save.php', {
+        method: "POST",
+        body: to_save,
+        headers: {"Content-type": "application/json; charset=UTF-8"}
+    })
+    .then(response => {
+        if (response.ok) return response.json();
+        throw new Error('Error en la xarxa');
+    })
+    .then(data => {
+        console.log("Partida guardada al servidor:", data);
+        alert("Partida i puntuació guardades correctament!");
+        window.location.assign("../");
+    })
+    .catch (err => {
+        console.error("Guardant en llista local...");
+        let localSaves = localStorage.getItem('localSaves') ? JSON.parse(localStorage.getItem('localSaves')) : [];
+        let newSave = {
+            id: Date.now(),
+            date: new Date().toLocaleString(),
+            level: this.level,
             score: this.score,
-            groups: this.groups,           
-            pendingGroups: this.pendingGroups, 
-            groupSize: this.groupSize,
-            level: this.level,             
-            mode: this.mode
-        });
-        fetch('../php/save.php', {
-            method: "POST",
-            body: to_save,
-            headers: {"Content-type": "application/json; charset=UTF-8"}
-        })
-        .then(response => {
-            if (response.ok) return response.json();
-            throw new Error('Error en la xarxa');
-        })
-        .then(data => {
-            console.log("Partida guardada al servidor:", data);
-        })
-        .catch (err => {
-            console.error("Guardant en llista local...");
-            let localSaves = localStorage.getItem('localSaves') ? JSON.parse(localStorage.getItem('localSaves')) : [];
-            let newSave = {
-                id: Date.now(),
-                date: new Date().toLocaleString(),
-                level: this.level,
-                score: this.score,
-                json: to_save
-            };
-            localSaves.unshift(newSave); 
-            localStorage.setItem('localSaves', JSON.stringify(localSaves));
-        });
+            json: to_save
+        };
+        localSaves.unshift(newSave); 
+        localStorage.setItem('localSaves', JSON.stringify(localSaves));
+        alert("Guardat en local! (Servidor no disponible)");
+        window.location.assign("../"); 
+    });
+},
 
-        setTimeout(() => {
-            window.location.assign("../");
-        }, 500);
-    },
-
-    updateDifficulty: function() {
-        if (this.level % 2 === 0 && this.groupSize < 4) {
-            this.groupSize++;
-        } else {
-            if (this.groups < this.maxGroups) this.groups++; 
-        }
-        this.score = 200 + (this.level * 50); 
-    },
+updateDifficulty: function() {
+    if (this.level % 2 === 0 && this.groupSize < 4) {
+        this.groupSize++;
+    } 
+    else {
+        if (this.groups < 12) this.groups++; 
+    }
+    this.score = 200 + (this.level * 50); 
+},
 };
 
 function shuffe(arr){
     arr.sort(function () {return Math.random() - 0.5});
 }
 
-function updateRanking() {
+function updateRanking(puntsReals) {
     let ranking = localStorage.getItem('ranking') ? JSON.parse(localStorage.getItem('ranking')) : [];
-    let alias = sessionStorage.getItem('userName') || "Anonim";
-    ranking.push({ name: alias, points: game.score, date: new Date().toLocaleDateString() });
+    let alias = sessionStorage.getItem('userName') || "Luhay";
+    let puntsFinal = (puntsReals !== undefined) ? puntsReals : (typeof game !== 'undefined' ? game.score : 0);
+    ranking.push({
+        name: alias,
+        points: puntsFinal,
+        date: new Date().toLocaleDateString()
+    });
     ranking.sort((a, b) => b.points - a.points);
     ranking = ranking.slice(0, 10);
     localStorage.setItem('ranking', JSON.stringify(ranking));
