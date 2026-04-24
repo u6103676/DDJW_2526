@@ -1,4 +1,4 @@
-import { clickCard, gameItems, selectCards, startGame, initCard, setRedrawCallback, score } from "./memory.js";
+import { clickCard, gameItems, selectCards, startGame, initCard, setRedrawCallback, score, saveGame } from "./memory.js";
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -52,15 +52,15 @@ function drawCard(x, y, value){
 }
 
 function drawUI() {
-    const currentScore = score !== undefined ? score : 200;
-    ctx.fillStyle = "#2c3e50";
+    ctx.fillStyle = "#2b2b36";
     ctx.fillRect(0, 0, canvas.width, 50); 
     ctx.fillStyle = "#ffa500";
     ctx.font = "bold 24px Arial";
     ctx.textAlign = "left";
     ctx.fillText(`Punts: ${score}`, 20, 35);
     ctx.textAlign = "right";
-    ctx.fillText(`Nivell: ${sessionStorage.getItem('gameMode') == 2 ? 'Infinit' : 'Pers.'}`, canvas.width - 20, 35);
+    const modeText = sessionStorage.getItem('gameMode') == 2 ? 'Mode Infinit' : 'Mode Personalitzat';
+    ctx.fillText(modeText, canvas.width - 20, 35);
 }
 
 export function setupBoard() {
@@ -96,6 +96,16 @@ export function setupBoard() {
         });
     };
 }
+
+document.getElementById('save').addEventListener('click', () => {
+    saveGame();
+    alert("Partida guardada correctament!");
+});
+document.getElementById('exit-btn').addEventListener('click', () => {
+    if (confirm("Segur que vols sortir? El progrés no guardat es perdrà.")) {
+        window.location.assign("../index.html");
+    }
+});
 
 setRedrawCallback(setupBoard);
 setupBoard();

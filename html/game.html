@@ -7,8 +7,19 @@
 	</head>
 	<body>
 		<h1>Partida</h1>
-        <canvas id="game" width="800" height="600"></canvas> 
-        <br>
-		<button id="save">Guardar</button>
+        <div class="game-ui-container">
+        <div id="stats">
+            Punts: <span id="score-val">200</span>
+        </div>
+        <div class="game-controls">
+            <button id="save" class="btn-game">Guardar Partida</button>
+            <button id="exit-btn" class="btn-game btn-exit">Sortir</button>
+        </div>
+    </div>
+    <div style="display: flex; justify-content: center; margin-top: 20px;">
+        <canvas id="game" width="800" height="600" style="border: 2px solid #fca311; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.5);"></canvas>
+    </div>
+</body>
+</html>
 	</body>
 </html>

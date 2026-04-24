@@ -150,13 +150,12 @@ save: function(){
             states: this.states,
             lastCards: this.lastCards,
             score: this.score,
-            groups: this.groups,          
+            groups: this.groups,           
             pendingGroups: this.pendingGroups, 
             groupSize: this.groupSize,
             level: this.level,             
             mode: this.mode
         });
-        let ret = false;
         fetch('../php/save.php', {
             method: "POST",
             body: to_save,
@@ -168,12 +167,21 @@ save: function(){
         })
         .then(data => {
             console.log("Partida guardada al servidor:", data);
-            ret = true;
         })
         .catch (err => {
-            console.error("Error al servidor, guardant en local:", err);
-            localStorage.save = to_save;
+            console.error("Guardant en llista local...");
+            let localSaves = localStorage.getItem('localSaves') ? JSON.parse(localStorage.getItem('localSaves')) : [];
+            let newSave = {
+                id: Date.now(),
+                date: new Date().toLocaleString(),
+                level: this.level,
+                score: this.score,
+                json: to_save
+            };
+            localSaves.unshift(newSave); 
+            localStorage.setItem('localSaves', JSON.stringify(localSaves));
         });
+
         setTimeout(() => {
             window.location.assign("../");
         }, 500);

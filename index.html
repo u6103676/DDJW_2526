@@ -31,6 +31,24 @@
 				Tancar
     		</button>
 		</div>
+		<div id="saves-container" class="ranking-container" style="display: none;">
+			<h2 class="ranking-title">📂 Partides Guardades</h2>
+			<table class="ranking-table">
+				<thead>
+					<tr>
+						<th>Data</th>
+						<th>Nivell</th>
+						<th>Punts</th>
+						<th>Acció</th>
+					</tr>
+				</thead>
+				<tbody id="saves-body">
+					</tbody>
+			</table>
+			<button class="btn-ranking-close" onclick="document.getElementById('saves-container').style.display='none'">
+				Tancar
+			</button>
+		</div>
 		<a href="html/options.html"><button id="options">Options</button></a>
 		<button id="saves">Saves</button>
 		<button id="ranking-btn">Veure Rànquing</button>

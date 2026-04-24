@@ -54,28 +54,10 @@ addEventListener('load', function() {
         window.location.assign("./html/options.html");
     });
 
-    document.getElementById('saves').addEventListener('click', 
-    function(){
-        let to_load = localStorage.save;
-        fetch('../php/load.php', {
-            method: "POST",
-            body: JSON.stringify({}),
-            headers: {"Content-type": "application/json; charset=UTF-8"}
-        })
-        .then(response => response.json())
-        .then(json => to_load = (!json.error)?JSON.stringify(json.save): localStorage.save)
-        .catch (err => {
-            console.error(err);
-            console.warn("La partida s'intentarà carregar de local");
-        });
-
-        if (!to_load) {
-            alert("No hi ha cap partida a carregar");
-            return;
-        }
-        sessionStorage.load = to_load;
-        window.location.assign("./html/game.html");
+    document.getElementById('saves').addEventListener('click', function(){
+        showSaves(); 
     });
+    
     document.getElementById('exit').addEventListener('click', function(){
     console.warn("No es pot sortir!");
     });
@@ -83,7 +65,7 @@ addEventListener('load', function() {
     document.getElementById('ranking-btn').addEventListener('click', function() {
         showRanking(); 
     });
-    
+
     function SVG(type){
         let svg = "";
         switch(type){
@@ -106,3 +88,37 @@ addEventListener('load', function() {
         return "data:image/svg+xml;base64," + btoa(fullSVG);
     }
 });
+
+window.showSaves = function() {
+    const container = document.getElementById('saves-container');
+    const tbody = document.getElementById('saves-body');
+    const saves = localStorage.getItem('localSaves') ? JSON.parse(localStorage.getItem('localSaves')) : [];
+    tbody.innerHTML = "";
+    if (saves.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='4' style='padding:20px; text-align:center;'>No hi ha partides guardades.</td></tr>";
+    } 
+    else {
+        saves.forEach((save, index) => {
+            const row = `
+                <tr>
+                    <td class="date-cell">${save.date}</td>
+                    <td>Nivell ${save.level}</td>
+                    <td class="score-cell">${save.score}</td>
+                    <td>
+                        <button onclick="loadThisSave(${index})" style="width:auto; padding:5px 10px; font-size:14px; margin:0;">
+                            Carregar
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+    container.style.display = 'block';
+    container.scrollIntoView({ behavior: 'smooth' });
+}
+window.loadThisSave = function(index) {
+    const saves = JSON.parse(localStorage.getItem('localSaves'));
+    sessionStorage.load = saves[index].json;
+    window.location.assign("./html/game.html");
+}
