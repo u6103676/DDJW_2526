@@ -1,4 +1,4 @@
-import { clickCard, gameItems, selectCards, startGame, initCard, setRedrawCallback } from "./memory.js";
+import { clickCard, gameItems, selectCards, startGame, initCard, setRedrawCallback, score } from "./memory.js";
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -51,29 +51,37 @@ function drawCard(x, y, value){
     }
 }
 
+function drawUI() {
+    const currentScore = score !== undefined ? score : 200;
+    ctx.fillStyle = "#2c3e50";
+    ctx.fillRect(0, 0, canvas.width, 50); 
+    ctx.fillStyle = "#ffa500";
+    ctx.font = "bold 24px Arial";
+    ctx.textAlign = "left";
+    ctx.fillText(`Punts: ${score}`, 20, 35);
+    ctx.textAlign = "right";
+    ctx.fillText(`Nivell: ${sessionStorage.getItem('gameMode') == 2 ? 'Infinit' : 'Pers.'}`, canvas.width - 20, 35);
+}
+
 export function setupBoard() {
     selectCards();
-    if (!gameItems || gameItems.length === 0) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        return;
-    }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawUI();
     const cols = 4; 
     const rows = Math.ceil(gameItems.length / cols);
     const totalW = cols * cardW + (cols - 1) * gap;
     const totalH = rows * cardH + (rows - 1) * gap;
     const startX = (canvas.width - totalW) / 2;
-    const startY = (canvas.height - totalH) / 2;
-
+    const startY = ((canvas.height - totalH) / 2) + 30;
     gameItems.forEach((value, idx) => {
         const x = startX + (idx % cols) * (cardW + gap);
         const y = startY + Math.floor(idx / cols) * (cardH + gap);
         drawCard(x, y, value);
         initCard((val) => {
             drawCard(x, y, val);
-        }, idx);                       // Modify values
+            drawUI(); 
+        }, idx);
     });
-
     canvas.onclick = (event) => {
         const rect = canvas.getBoundingClientRect();
         const mouseX = event.clientX - rect.left;
@@ -83,6 +91,7 @@ export function setupBoard() {
             const y = startY + Math.floor(idx / cols) * (cardH + gap);
             if (mouseX >= x && mouseX <= x + cardW && mouseY >= y && mouseY <= y + cardH) {
                 clickCard(idx);
+                drawUI(); 
             }
         });
     };

@@ -103,6 +103,7 @@ var game = {
                 this.lastCards.forEach(cardIdx => this.states[cardIdx] = StateCard.DONE);
                 if(this.pendingGroups <= 0){
                     if(this.mode === 1){
+                        updateRanking();
                         alert(`Has guanyat el Mode 1 amb ${this.score} punts!`);
                         window.location.assign("../");
                     }
@@ -125,6 +126,7 @@ var game = {
                     }, 500); 
                 this.score -= 25;
                 if (this.score <= 0){
+                    updateRanking();
                     alert ("Has perdut");
                     window.location.assign("../");
                 }
@@ -181,19 +183,38 @@ function shuffe(arr){
     arr.sort(function () {return Math.random() - 0.5});
 }
 
+function updateRanking() {
+    let ranking = localStorage.getItem('ranking') ? JSON.parse(localStorage.getItem('ranking')) : [];
+    let alias = sessionStorage.getItem('userName') || "Anonim";
+    ranking.push({ name: alias, points: game.score, date: new Date().toLocaleDateString() });
+    ranking.sort((a, b) => b.points - a.points);
+    ranking = ranking.slice(0, 10);
+    localStorage.setItem('ranking', JSON.stringify(ranking));
+}
+
 export var gameItems;
+export var score; 
+
 export function selectCards() { 
     if (game.items.length === 0) {
         game.select();
     }
     gameItems = game.items;
+    score = game.score; 
 }
-export function clickCard(indx){ game.click(indx); }
+
+export function clickCard(indx){ 
+    game.click(indx); 
+    score = game.score;
+}
+
 export function startGame(){ game.start(); }
+
 export function initCard(callback, idx) { 
     if (!game.setValue) game.setValue = [];
     game.setValue[idx] = callback;
 }
+
 export function saveGame(){
     game.save();
 }

@@ -1,3 +1,28 @@
+window.showRanking = function() {
+    const container = document.getElementById('ranking-container');
+    const tbody = document.getElementById('ranking-body');
+    const ranking = localStorage.getItem('ranking') ? JSON.parse(localStorage.getItem('ranking')) : [];
+    tbody.innerHTML = "";
+    if (ranking.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='4' style='padding:20px; text-align:center;'>Encara no hi ha rècords.</td></tr>";
+    } 
+    else {
+        ranking.forEach((player, index) => {
+            const row = `
+                <tr>
+                    <td class="pos-cell">${index + 1}</td>
+                    <td>${player.name}</td>
+                    <td class="score-cell">${player.points}</td>
+                    <td class="date-cell">${player.date}</td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+    container.style.display = 'block';
+    container.scrollIntoView({ behavior: 'smooth' });
+}
+
 addEventListener('load', function() {
     document.getElementById('play').addEventListener('click', 
     function(){
@@ -54,6 +79,11 @@ addEventListener('load', function() {
     document.getElementById('exit').addEventListener('click', function(){
     console.warn("No es pot sortir!");
     });
+
+    document.getElementById('ranking-btn').addEventListener('click', function() {
+        showRanking(); 
+    });
+    
     function SVG(type){
         let svg = "";
         switch(type){

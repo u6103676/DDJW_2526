@@ -13,8 +13,27 @@
 			<button id="mode-1">Mode 1: Normal</button>
 			<button id="mode-2">Mode 2: Infinit</button>
     	</div>
+		<div id="ranking-container" class="ranking-container" style="display: none;">
+			<h2 class="ranking-title">Top 10 Rànquing</h2>
+			<table class="ranking-table">
+				<thead>
+					<tr>
+						<th>Pos.</th>
+						<th>Àlies</th>
+						<th>Punts</th>
+						<th>Data</th>
+					</tr>
+				</thead>
+				<tbody id="ranking-body">
+					</tbody>
+			</table>
+			<button class="btn-ranking-close" onclick="document.getElementById('ranking-container').style.display='none'">
+				Tancar
+    		</button>
+		</div>
 		<a href="html/options.html"><button id="options">Options</button></a>
 		<button id="saves">Saves</button>
+		<button id="ranking-btn">Veure Rànquing</button>
 		<button id="exit">Exit</button>
 		<script src="js/main.js" type="module"></script>
 	</body>
