@@ -60,3 +60,55 @@ $('#apply').on('click', function(){
     options.applyChanges();
     location.assign("../");
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    const modeSelector = document.getElementById('gameModeConfig');
+    const config1 = document.getElementById('config-mode-1');
+    const config2 = document.getElementById('config-mode-2');
+    const applyBtn = document.getElementById('apply');
+    const defaultBtn = document.getElementById('default');
+    const savedOptions = localStorage.getItem('options') ? JSON.parse(localStorage.getItem('options')) : null;
+    if (savedOptions) {
+        document.getElementById('pairs').value = savedOptions.pairs || 2;
+        document.getElementById('groupSize').value = savedOptions.groupSize || 2;
+        document.getElementById('startLevel').value = savedOptions.startLevel || 1;
+        const difSelector = document.getElementById('dif');
+        const validValues = ["500", "1000", "2000"];
+        if (validValues.includes(savedOptions.difficulty)) {
+            difSelector.value = savedOptions.difficulty;
+        } 
+        else {
+            difSelector.value = "1000"; 
+        }
+    } 
+    else {
+        document.getElementById('dif').value = "1000";
+    }
+    modeSelector.addEventListener('change', () => {
+        if (modeSelector.value === "1") {
+            config1.style.display = 'block';
+            config2.style.display = 'none';
+        } 
+        else {
+            config1.style.display = 'none';
+            config2.style.display = 'block';
+        }
+    });
+    applyBtn.addEventListener('click', () => {
+        const options = {
+            pairs: document.getElementById('pairs').value,
+            groupSize: document.getElementById('groupSize').value,
+            startLevel: document.getElementById('startLevel').value,
+            difficulty: document.getElementById('dif').value
+        };
+        localStorage.setItem('options', JSON.stringify(options));
+        alert("Configuració guardada correctament!");
+        window.location.assign("../index.html");
+    });
+    defaultBtn.addEventListener('click', () => {
+        if (confirm("Vols restablir els valors per defecte?")) {
+            localStorage.removeItem('options');
+            location.reload(); 
+        }
+    });
+});

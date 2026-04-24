@@ -1,27 +1,55 @@
-<!DOCTYPE html> 
-<html>
-	<head>
-        <script src="../js/options.js" type="module"></script>
-		<title> Memory - Opcions </title>
-	</head>
-	<body>
-		<h1>Opcions</h1>
-        <label for="pairs">Número de cartes</label>
-        <input type="number" id="pairs" value="2" min="2" max="6">
-        <label for="dif">Dificultat</label>
-        <select id="dif">
-            <option value="easy">Baixa</option>
-            <option value="normal" selected>Normal</option>
-            <option value="hard">Alta</option>
-        </select>
-        <div class="option-item">
-    <label for="groupSize">Mida de grup:</label>
-    <select id="groupSize">
-        <option value="2">Parelles</option>
-        <option value="3">Trios</option>
-        <option value="4">Quartets</option>
-    </select>
-        <button id="default">Per defecte</button>
-        <button id="apply">Aplicar</button>
-	</body>
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <title>Memory - Opcions</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <script src="../js/options.js" type="module"></script>
+</head>
+<body>
+    <div class="options-container">
+        <h1 class="options-title">Configuració</h1>
+        <div class="option-group">
+            <label for="gameModeConfig">Configurar opcions per a:</label>
+            <select id="gameModeConfig">
+                <option value="1">Mode 1: Estandar</option>
+                <option value="2">Mode 2: Infinit</option>
+            </select>
+        </div>
+        <hr class="options-separator">
+        <div id="config-mode-1">
+            <div class="option-group">
+                <label for="pairs">Número de grups</label>
+                <input type="number" id="pairs" value="2" min="2" max="6">
+            </div>
+            <div class="option-group">
+                <label for="groupSize">Mida dels grups:</label>
+                <select id="groupSize">
+                    <option value="2">Parelles (2)</option>
+                    <option value="3">Trios (3)</option>
+                    <option value="4">Quartets (4)</option>
+                </select>
+            </div>
+        </div>
+        <div id="config-mode-2" style="display: none;">
+            <div class="option-group">
+                <label for="startLevel">Nivell inicial:</label>
+                <input type="number" id="startLevel" value="1" min="1" max="10">
+            </div>
+        </div>
+        <div class="option-group">
+            <label for="dif">Velocitat de visualització:</label>
+            <select id="dif">
+                <option value="2000">Lenta (2s)</option>
+                <option value="1000" selected>Normal (1s)</option>
+                <option value="500">Ràpida (0.5s)</option>
+            </select>
+        </div>
+        <div class="options-buttons">
+            <button id="apply" class="btn-save">Aplicar</button>
+            <button id="default" class="btn-back" style="width: 100% !important;">Valors per defecte</button>
+            <button onclick="window.location.assign('../index.html')" class="btn-back" style="width: 100% !important;">Tornar al menú</button>
+        </div>
+    </div>
+</body>
 </html>

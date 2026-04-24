@@ -57,6 +57,14 @@ var game = {
                     this.groupSize = parseInt(config.groupSize) || 2;
                     this.groups = parseInt(config.pairs) || 2;
                 }
+                else if (this.mode === 2 && config) {
+                    this.level = parseInt(config.startLevel) || 1;
+                    this.groupSize = 2;
+                    this.groups = 2;
+                    for(let i = 1; i < this.level; i++) {
+                        this.updateDifficulty(); 
+                    }
+                }
                 else {
                 this.groupSize = 2;
                 this.groups = 2;
@@ -78,15 +86,17 @@ var game = {
 
     start: function(){
         this.ready = 0;
-        this.items.forEach((_,indx)=>{
+        let config = localStorage.options ? JSON.parse(localStorage.options) : null;
+        let waitTime = (config && config.difficulty) ? parseInt(config.difficulty) : 1000;
+        this.items.forEach((_, indx) => {
             if (this.states[indx] !== StateCard.ENABLE){
                 this.ready++;
             }
             else{
-                setTimeout(()=>{
+                setTimeout(() => {
                     this.ready++;
                     this.goBack(indx);
-                }, 1000 + 100 * indx);
+                }, waitTime + (100 * indx)); 
             }
         });
     },
