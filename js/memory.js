@@ -21,6 +21,7 @@ var game = {
     lastCards: [],
     score: 200,
     groups: 2,
+    pendingGroups: 0,
     groupSize: 2,
     mode: 1,   
     level: 1,
@@ -34,6 +35,7 @@ var game = {
         this.states[idx] = StateCard.DISABLE;
     },
     select: function(){
+        this.setValue = [];
         if (sessionStorage.load){ // Carreguem partida
             let toLoad = JSON.parse(sessionStorage.load);
             this.items = toLoad.items;
@@ -44,37 +46,40 @@ var game = {
             this.groupSize = toLoad.groupSize;
             this.mode = toLoad.mode || 1; 
             this.level = toLoad.level || 1;
+            sessionStorage.removeItem('load');
         }
         else{ // Nova partida
-            this.setValue = [];
             this.mode = parseInt(sessionStorage.getItem('gameMode')) || 1;
-            this.level = 1;
-            let config = localStorage.options ? JSON.parse(localStorage.options) : null;
-            if (this.mode === 1 && config) {
-                this.groupSize = parseInt(config.groupSize) || 2;
-                this.groups = parseInt(config.pairs) || 2;
-            }
-            else {
+            if (this.items.length === 0) {
+                this.level = 1;
+                let config = localStorage.options ? JSON.parse(localStorage.options) : null;
+                if (this.mode === 1 && config) {
+                    this.groupSize = parseInt(config.groupSize) || 2;
+                    this.groups = parseInt(config.pairs) || 2;
+                }
+                else {
                 this.groupSize = 2;
                 this.groups = 2;
+                }
             }
-            this.items = resources.slice();          
-            shuffe(this.items);                      
-            this.items = this.items.slice(0, this.groups); 
-            let baseItems = this.items.slice();
-            this.items = [];
+            this.pendingGroups = this.groups;
+            let pool = resources.slice();
+            shuffe(pool);
+            let selectedTypes = pool.slice(0, this.groups);
+            let newItems = [];
             for(let i = 0; i < this.groupSize; i++){
-                this.items = this.items.concat(baseItems);
+                newItems = newItems.concat(selectedTypes);
             }        
-            shuffe(this.items);
-            this.states = new Array(this.items.length);
+            shuffe(newItems);
+            this.items = newItems; 
+            this.states = new Array(this.items.length).fill(StateCard.ENABLE);
         }
     },
 
     start: function(){
+        this.ready = 0;
         this.items.forEach((_,indx)=>{
-            if (this.states[indx] === StateCard.DISABLE ||
-                this.states[indx] === StateCard.DONE){
+            if (this.states[indx] !== StateCard.ENABLE){
                 this.ready++;
             }
             else{
@@ -94,9 +99,9 @@ var game = {
                 this.items[cardIdx] === this.items[this.lastCards[0]]
             );
             if(allMatch){
-                this.groups--;
+                this.pendingGroups--;
                 this.lastCards.forEach(cardIdx => this.states[cardIdx] = StateCard.DONE);
-                if(this.groups <= 0){
+                if(this.pendingGroups <= 0){
                     if(this.mode === 1){
                         alert(`Has guanyat el Mode 1 amb ${this.score} punts!`);
                         window.location.assign("../");
@@ -127,14 +132,17 @@ var game = {
             this.lastCards = [];
         }
     },
-    save: function(){
+save: function(){
         let to_save = JSON.stringify({
             items: this.items,
             states: this.states,
             lastCards: this.lastCards,
             score: this.score,
-            groups: this.groups,
-            groupSize: this.groupSize
+            groups: this.groups,          
+            pendingGroups: this.pendingGroups, 
+            groupSize: this.groupSize,
+            level: this.level,             
+            mode: this.mode
         });
         let ret = false;
         fetch('../php/save.php', {
@@ -142,14 +150,21 @@ var game = {
             body: to_save,
             headers: {"Content-type": "application/json; charset=UTF-8"}
         })
-        .then(response => ret = JSON.parse(response))
-        .catch (err => console.error(err));
-
-        if (!ret) {
-            console.warn("La partida s'ha guardat en local.");
+        .then(response => {
+            if (response.ok) return response.json();
+            throw new Error('Error en la xarxa');
+        })
+        .then(data => {
+            console.log("Partida guardada al servidor:", data);
+            ret = true;
+        })
+        .catch (err => {
+            console.error("Error al servidor, guardant en local:", err);
             localStorage.save = to_save;
-        }
-        window.location.assign("../");
+        });
+        setTimeout(() => {
+            window.location.assign("../");
+        }, 500);
     },
 
     updateDifficulty: function() {
@@ -168,14 +183,16 @@ function shuffe(arr){
 
 export var gameItems;
 export function selectCards() { 
-    game.select();
+    if (game.items.length === 0) {
+        game.select();
+    }
     gameItems = game.items;
 }
 export function clickCard(indx){ game.click(indx); }
 export function startGame(){ game.start(); }
-export function initCard(callback) { 
+export function initCard(callback, idx) { 
     if (!game.setValue) game.setValue = [];
-    game.setValue.push(callback); 
+    game.setValue[idx] = callback;
 }
 export function saveGame(){
     game.save();
